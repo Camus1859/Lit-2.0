@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "lib": ["ES2021", "DOM"],
+      "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.spec.ts"]
+}
