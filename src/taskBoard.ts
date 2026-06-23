@@ -1,6 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import "./taskColumn.ts";
+import "./taskForm.ts";
 import { Task } from "./type/task.ts";
 
 @customElement("task-board")
@@ -9,6 +10,7 @@ export class TaskBoard extends LitElement {
     .column-container {
       display: flex;
       justify-content: space-between;
+      margin-top: 20px
     }
   `;
 
@@ -46,6 +48,10 @@ export class TaskBoard extends LitElement {
 
   render() {
     return html`
+    <div>
+    
+    <task-form @add-task=${this._handleTaskAdded}></task-form>
+  
       <div class="column-container">
         <task-column
           .columnType=${"To Do"}
@@ -60,10 +66,21 @@ export class TaskBoard extends LitElement {
           .tasks=${this.getTasks(this.tasks, "done")}
         ></task-column>
       </div>
+
+       </div>
+
     `;
   }
 
   getTasks(tasks: Task[], status: string) {
     return tasks.filter((task) => task.status === status);
+  }
+
+  _handleTaskAdded(e: CustomEvent) {
+    console.log("fire 2");
+
+    this.tasks = [...this.tasks, e.detail.task]
+
+    console.log(this.tasks)
   }
 }
