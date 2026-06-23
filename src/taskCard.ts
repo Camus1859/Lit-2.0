@@ -32,16 +32,18 @@ export class TaskCard extends LitElement {
     description: string;
     priority: string;
     status: string;
+    id: string;
   } = {
     title: "",
     description: "",
     priority: "",
     status: "",
+    id: Math.random().toString(),
   };
 
   render() {
     return html`
-      <div class="card-container">
+      <div class="card-container" draggable="true">
         <p>Title: ${this.task.title}</p>
         <p>Description: ${this.task.description}</p>
         <p>
@@ -61,6 +63,28 @@ export class TaskCard extends LitElement {
       return "yellow";
     } else {
       return "green";
+    }
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener("dragstart", this._onDragStart, { passive: false });
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener("dragstart", this._onDragStart);
+  }
+
+  _onDragStart(event: DragEvent) {
+    const transferedData = event.dataTransfer;
+
+    if (transferedData) {
+      transferedData.effectAllowed = "move";
+
+      console.log(this.task.id);
+
+      transferedData.setData("text/plain", this.task.id);
     }
   }
 }
