@@ -28,6 +28,9 @@ export class TaskColumn extends LitElement {
   @property()
   columnType: string = "";
 
+  @property()
+  status: string = "";
+
   render() {
     return html`
       <div class="column">
@@ -37,5 +40,33 @@ export class TaskColumn extends LitElement {
         })}
       </div>
     `;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.addEventListener("drop", this._onDrop);
+    this.addEventListener("dragover", this._onDragOver);
+  }
+
+  _onDrop(event: DragEvent) {
+    console.log("rannn");
+    const transferData = event.dataTransfer;
+
+    const taskId = transferData?.getData("text/plain");
+
+    console.log(this.status);
+
+    const options = {
+      detail: { id: taskId, columnName: this.status },
+      bubbles: true,
+      composed: true,
+    };
+
+    this.dispatchEvent(new CustomEvent("task-moved", options));
+  }
+
+  _onDragOver(event: DragEvent) {
+    event.preventDefault();
   }
 }
