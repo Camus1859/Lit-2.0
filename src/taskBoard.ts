@@ -10,7 +10,7 @@ export class TaskBoard extends LitElement {
     .column-container {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px
+      margin-top: 20px;
     }
   `;
 
@@ -48,39 +48,57 @@ export class TaskBoard extends LitElement {
 
   render() {
     return html`
-    <div>
-    
-    <task-form @add-task=${this._handleTaskAdded}></task-form>
-  
-      <div class="column-container">
-        <task-column
-          .columnType=${"To Do"}
-          .tasks=${this.getTasks(this.tasks, "todo")}
-        ></task-column>
-        <task-column
-          .columnType=${"In Progress"}
-          .tasks=${this.getTasks(this.tasks, "in progress")}
-        ></task-column>
-        <task-column
-          .columnType=${"Done"}
-          .tasks=${this.getTasks(this.tasks, "done")}
-        ></task-column>
+      <div>
+        <task-form @add-task=${this._handleTaskAdded}></task-form>
+
+        <div class="column-container">
+          <task-column
+            .columnType=${"To Do"}
+            .tasks=${this.getTasks(this.tasks, "todo")}
+            @task-moved=${this._handleTaskMoved}
+            .status=${"todo"}
+          ></task-column>
+          <task-column
+            .columnType=${"In Progress"}
+            .tasks=${this.getTasks(this.tasks, "in progress")}
+            @task-moved=${this._handleTaskMoved}
+            .status=${"in progress"}
+          ></task-column>
+          <task-column
+            .columnType=${"Done"}
+            .tasks=${this.getTasks(this.tasks, "done")}
+            @task-moved=${this._handleTaskMoved}
+            .status=${"done"}
+          ></task-column>
+        </div>
       </div>
-
-       </div>
-
     `;
   }
 
   getTasks(tasks: Task[], status: string) {
-    return tasks.filter((task) => task.status === status);
+    return tasks.filter(
+      (task) => task.status.toLowerCase() === status.toLowerCase(),
+    );
   }
 
   _handleTaskAdded(e: CustomEvent) {
     console.log("fire 2");
 
-    this.tasks = [...this.tasks, e.detail.task]
+    this.tasks = [...this.tasks, e.detail.task];
 
-    console.log(this.tasks)
+    console.log(this.tasks);
+  }
+
+  _handleTaskMoved(e: CustomEvent) {
+    console.log("fired");
+    const taskId = e.detail.id;
+    const columnName = e.detail.columnName;
+
+    console.log(taskId);
+    console.log(columnName);
+
+    this.tasks = this.tasks.map((task) => {
+      return task.id === taskId ? { ...task, status: columnName } : task;
+    });
   }
 }
