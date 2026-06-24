@@ -82,20 +82,12 @@ export class TaskBoard extends LitElement {
   }
 
   _handleTaskAdded(e: CustomEvent) {
-    console.log("fire 2");
-
     this.tasks = [...this.tasks, e.detail.task];
-
-    console.log(this.tasks);
   }
 
   _handleTaskMoved(e: CustomEvent) {
-    console.log("fired");
     const taskId = e.detail.id;
     const columnName = e.detail.columnName;
-
-    console.log(taskId);
-    console.log(columnName);
 
     this.tasks = this.tasks.map((task) => {
       return task.id === taskId ? { ...task, status: columnName } : task;
