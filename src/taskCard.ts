@@ -24,6 +24,14 @@ export class TaskCard extends LitElement {
     .priority-green {
       color: green;
     }
+
+    .button-container {
+      width: 100%;
+    }
+
+    .btn {
+      min-width: 100px;
+    }
   `;
 
   @property()
@@ -52,6 +60,10 @@ export class TaskCard extends LitElement {
             ${this.task.priority}
           </span>
         </p>
+        <div class="button-container">
+          <button class="btn" @click=${this.deleteTask}>Delete</button>
+          <button class="btn" @click=${this.editTask}>Edit</button>
+        </div>
       </div>
     `;
   }
@@ -86,5 +98,25 @@ export class TaskCard extends LitElement {
 
       transferedData.setData("text/plain", this.task.id);
     }
+  }
+
+  deleteTask() {
+    const options = {
+      detail: { id: this.task.id },
+      bubbles: true,
+      composed: true,
+    };
+
+    this.dispatchEvent(new CustomEvent("delete-task", options));
+  }
+
+  editTask() {
+    const options = {
+      detail: { showModal: true, id: this.task.id },
+      bubbles: true,
+      composed: true,
+    };
+
+    this.dispatchEvent(new CustomEvent("open-modal", options))
   }
 }
