@@ -1,7 +1,9 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import "./taskColumn.ts";
 import "./taskForm.ts";
+import "./taskModal.ts";
+import "./taskEdit.ts"
 import { Task } from "./type/task.ts";
 
 @customElement("task-board")
@@ -46,29 +48,47 @@ export class TaskBoard extends LitElement {
     },
   ];
 
+  @state()
+  showModal: Boolean = false;
+
+  @state()
+  taskToEdit: Task | null = null;
+
   render() {
     return html`
       <div>
-        <task-form @add-task=${this._handleTaskAdded}></task-form>
+        <task-modal
+          @close-modal=${this._closeModal}
+          .showModal=${this.showModal}
+        >
+          <task-edit .taskToEdit=${this.taskToEdit}></task-edit>
+        </task-modal>
 
+        <task-form @add-task=${this._handleTaskAdded}></task-form>
         <div class="column-container">
           <task-column
             .columnType=${"To Do"}
             .tasks=${this.getTasks(this.tasks, "todo")}
             @task-moved=${this._handleTaskMoved}
             .status=${"todo"}
+            @delete-task=${this._handleDeleteTask}
+            @open-modal=${this._handleModal}
           ></task-column>
           <task-column
             .columnType=${"In Progress"}
             .tasks=${this.getTasks(this.tasks, "in progress")}
             @task-moved=${this._handleTaskMoved}
             .status=${"in progress"}
+            @delete-task=${this._handleDeleteTask}
+            @open-modal=${this._handleModal}
           ></task-column>
           <task-column
             .columnType=${"Done"}
             .tasks=${this.getTasks(this.tasks, "done")}
             @task-moved=${this._handleTaskMoved}
             .status=${"done"}
+            @delete-task=${this._handleDeleteTask}
+            @open-modal=${this._handleModal}
           ></task-column>
         </div>
       </div>
@@ -92,5 +112,22 @@ export class TaskBoard extends LitElement {
     this.tasks = this.tasks.map((task) => {
       return task.id === taskId ? { ...task, status: columnName } : task;
     });
+  }
+
+  _handleDeleteTask(e: CustomEvent) {
+    const taskId = e.detail.id;
+
+    this.tasks = this.tasks.filter((task) => task.id !== taskId);
+  }
+
+  _handleModal(e: CustomEvent) {
+    console.log("fired");
+    this.showModal = e.detail.showModal;
+
+    this.taskToEdit = this.tasks.find((task) => task.id === e.detail.id) ?? null
+  }
+
+  _closeModal(e: CustomEvent) {
+    this.showModal = e.detail.showModal;
   }
 }
