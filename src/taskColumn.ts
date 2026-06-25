@@ -12,7 +12,7 @@ export class TaskColumn extends LitElement {
     .column {
       border: 1px solid black;
       width: 400px;
-      height: 100vh;
+      height: 100%;
       text-align: center;
       font-size: 20px;
       padding-top: 20px;
