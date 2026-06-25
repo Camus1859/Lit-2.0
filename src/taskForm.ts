@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { property, customElement, query, state } from "lit/decorators.js";
+import { PriorityFilter, SortFilter } from "./type/task";
 
 @customElement("task-form")
 export class TaskForm extends LitElement {
@@ -11,7 +12,14 @@ export class TaskForm extends LitElement {
   @state()
   description: string = "";
 
+  @state()
   priority: string = "";
+
+  @state()
+  priorityFilter: PriorityFilter = PriorityFilter.All;
+
+  @state()
+  sort: SortFilter = SortFilter.Default;
 
   render() {
     return html`<div>
@@ -66,6 +74,56 @@ export class TaskForm extends LitElement {
           </select>
         </div>
         <button @click=${this._addTask}>Add Task</button>
+      </div>
+
+      <div>
+        <label for="priority-filter">Filter By Priority:</label>
+        <select
+          name="priority-filter"
+          id="priority-filter"
+          .value=${this.priorityFilter}
+          @change=${(e: Event) => {
+            const target = e.target as HTMLSelectElement;
+            console.log(target.value);
+            const options = {
+              detail: { filterValue: target.value },
+              bubbles: true,
+              composed: true,
+            };
+            this.dispatchEvent(new CustomEvent("filter-task", options));
+            this.priorityFilter = target.value as PriorityFilter;
+          }}
+        >
+          <option value="all">All</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="sort-select">Sort:</label>
+
+        <select
+          name="sort"
+          id="sort"
+          .value=${this.sort}
+          @change=${(e: Event) => {
+            const target = e.target as HTMLSelectElement;
+            const options = {
+              detail: { sortValue: target.value },
+              bubbles: true,
+              composed: true,
+            };
+
+            this.dispatchEvent(new CustomEvent("sort-task", options));
+            this.sort = target.value as SortFilter;
+          }}
+        >
+          <option value="default">Default</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
       </div>
     </div>`;
   }
