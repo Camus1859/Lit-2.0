@@ -3,8 +3,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import "./taskColumn.ts";
 import "./taskForm.ts";
 import "./taskModal.ts";
-import "./taskEdit.ts"
-import { Task } from "./type/task.ts";
+import "./taskEdit.ts";
+import { PriorityFilter, SortFilter, Task } from "./type/task.ts";
 
 @customElement("task-board")
 export class TaskBoard extends LitElement {
@@ -16,7 +16,7 @@ export class TaskBoard extends LitElement {
     }
   `;
 
-  @property()
+  @state()
   tasks: Task[] = [
     {
       title: "Set up project",
@@ -54,6 +54,12 @@ export class TaskBoard extends LitElement {
   @state()
   taskToEdit: Task | null = null;
 
+  @state()
+  priorityFilter: PriorityFilter = PriorityFilter.All;
+
+  @state()
+  sort: SortFilter = SortFilter.Default;
+
   render() {
     return html`
       <div>
@@ -61,10 +67,16 @@ export class TaskBoard extends LitElement {
           @close-modal=${this._closeModal}
           .showModal=${this.showModal}
         >
-          <task-edit .taskToEdit=${this.taskToEdit}></task-edit>
+          <task-edit
+            @edit-task=${this._handleEditTask}
+            .taskToEdit=${this.taskToEdit}
+          ></task-edit>
         </task-modal>
-
-        <task-form @add-task=${this._handleTaskAdded}></task-form>
+        <task-form
+          @filter-task=${this._handlePriorityFilter}
+          @add-task=${this._handleTaskAdded}
+          @sort-task=${this._handleSort}
+        ></task-form>
         <div class="column-container">
           <task-column
             .columnType=${"To Do"}
@@ -96,9 +108,30 @@ export class TaskBoard extends LitElement {
   }
 
   getTasks(tasks: Task[], status: string) {
-    return tasks.filter(
-      (task) => task.status.toLowerCase() === status.toLowerCase(),
-    );
+    const priorityWeight: { [key: string]: number } = {
+      high: 1,
+      medium: 2,
+      low: 3,
+    };
+
+    return tasks
+      .filter(
+        (task) =>
+          task.status.toLowerCase() === status.toLowerCase() &&
+          (this.priorityFilter === "all" ||
+            task.priority === this.priorityFilter),
+      )
+      .sort((a: Task, b: Task) => {
+        if (this.sort === "default") {
+          return 0;
+        }
+
+        if (this.sort === "high") {
+          return priorityWeight[a.priority] - priorityWeight[b.priority];
+        } else {
+          return priorityWeight[b.priority] - priorityWeight[a.priority];
+        }
+      });
   }
 
   _handleTaskAdded(e: CustomEvent) {
@@ -124,10 +157,27 @@ export class TaskBoard extends LitElement {
     console.log("fired");
     this.showModal = e.detail.showModal;
 
-    this.taskToEdit = this.tasks.find((task) => task.id === e.detail.id) ?? null
+    this.taskToEdit =
+      this.tasks.find((task) => task.id === e.detail.id) ?? null;
   }
 
   _closeModal(e: CustomEvent) {
     this.showModal = e.detail.showModal;
+  }
+
+  _handleEditTask(e: CustomEvent) {
+    this.showModal = e.detail.showModal;
+    this.tasks = this.tasks.map((task) =>
+      task.id === e.detail.task.id ? { ...e.detail.task } : task,
+    );
+  }
+
+  _handlePriorityFilter(e: CustomEvent) {
+    console.log(e.detail.filterValue);
+    this.priorityFilter = e.detail.filterValue;
+  }
+
+  _handleSort(e: CustomEvent) {
+    this.sort = e.detail.sortValue;
   }
 }
