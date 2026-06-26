@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import "./taskColumn.ts";
 import "./taskForm.ts";
 import "./taskModal.ts";
@@ -17,36 +17,7 @@ export class TaskBoard extends LitElement {
   `;
 
   @state()
-  tasks: Task[] = [
-    {
-      title: "Set up project",
-      description: "Initialize repo and install deps",
-      priority: "high",
-      status: "done",
-      id: "1",
-    },
-    {
-      title: "Build UI",
-      description: "Create task board layout",
-      priority: "medium",
-      status: "in progress",
-      id: "2",
-    },
-    {
-      title: "Add drag and drop",
-      description: "Enable moving tasks between columns",
-      priority: "low",
-      status: "todo",
-      id: "3",
-    },
-    {
-      title: "Add Edit Delete functionality",
-      description: "User should be able to add and delete task",
-      priority: "low",
-      status: "todo",
-      id: "4",
-    },
-  ];
+  tasks: Task[] = [];
 
   @state()
   showModal: Boolean = false;
@@ -134,25 +105,6 @@ export class TaskBoard extends LitElement {
       });
   }
 
-  _handleTaskAdded(e: CustomEvent) {
-    this.tasks = [...this.tasks, e.detail.task];
-  }
-
-  _handleTaskMoved(e: CustomEvent) {
-    const taskId = e.detail.id;
-    const columnName = e.detail.columnName;
-
-    this.tasks = this.tasks.map((task) => {
-      return task.id === taskId ? { ...task, status: columnName } : task;
-    });
-  }
-
-  _handleDeleteTask(e: CustomEvent) {
-    const taskId = e.detail.id;
-
-    this.tasks = this.tasks.filter((task) => task.id !== taskId);
-  }
-
   _handleModal(e: CustomEvent) {
     console.log("fired");
     this.showModal = e.detail.showModal;
@@ -165,13 +117,6 @@ export class TaskBoard extends LitElement {
     this.showModal = e.detail.showModal;
   }
 
-  _handleEditTask(e: CustomEvent) {
-    this.showModal = e.detail.showModal;
-    this.tasks = this.tasks.map((task) =>
-      task.id === e.detail.task.id ? { ...e.detail.task } : task,
-    );
-  }
-
   _handlePriorityFilter(e: CustomEvent) {
     console.log(e.detail.filterValue);
     this.priorityFilter = e.detail.filterValue;
@@ -179,5 +124,112 @@ export class TaskBoard extends LitElement {
 
   _handleSort(e: CustomEvent) {
     this.sort = e.detail.sortValue;
+  }
+
+  async connectedCallback(): Promise<void> {
+    super.connectedCallback();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/tasks");
+
+      if (!response.ok) {
+        throw new Error("Unable to fetch tasks");
+      }
+
+      const data = await response.json();
+
+      this.tasks = data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async _handleTaskAdded(e: CustomEvent<{ task: Task }>) {
+    try {
+      const response = await fetch("http://localhost:3000/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(e.detail.task),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to add task");
+      }
+
+      const data = await response.json();
+
+      this.tasks = data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async _handleTaskMoved(e: CustomEvent<{ id: string; columnName: string }>) {
+    const taskId = e.detail.id;
+    const columnName = e.detail.columnName;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: columnName }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to update task");
+      }
+
+      const data = await response.json();
+
+      this.tasks = data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async _handleDeleteTask(e: CustomEvent<{ id: string }>) {
+    const taskId = e.detail.id;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to find task");
+      }
+
+      const data = await response.json();
+
+      this.tasks = data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async _handleEditTask(e: CustomEvent<{ showModal: boolean; task: Task }>) {
+    this.showModal = e.detail.showModal;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/tasks/${e.detail.task.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(e.detail.task),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Unable to edit task");
+      }
+
+      const data = await response.json();
+
+      this.tasks = data;
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
