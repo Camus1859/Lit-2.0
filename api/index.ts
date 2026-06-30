@@ -5,7 +5,7 @@ import path from "path";
 import { Task } from "./type/task";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data/tasks.json");
 
 app.use(cors());
