@@ -11,6 +11,6 @@
     "noEmit": true
 
   },
-  "include": ["src/**/*"],
+  "include": ["front-end/src/**/*"],
   "exclude": ["**/*.spec.ts"]
 }
