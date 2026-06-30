@@ -130,7 +130,7 @@ export class TaskBoard extends LitElement {
     super.connectedCallback();
 
     try {
-      const response = await fetch("http://localhost:3000/api/tasks");
+      const response = await fetch("/api/tasks");
 
       if (!response.ok) {
         throw new Error("Unable to fetch tasks");
@@ -146,7 +146,7 @@ export class TaskBoard extends LitElement {
 
   async _handleTaskAdded(e: CustomEvent<{ task: Task }>) {
     try {
-      const response = await fetch("http://localhost:3000/api/tasks", {
+      const response = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(e.detail.task),
@@ -169,7 +169,7 @@ export class TaskBoard extends LitElement {
     const columnName = e.detail.columnName;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: columnName }),
@@ -191,7 +191,7 @@ export class TaskBoard extends LitElement {
     const taskId = e.detail.id;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -213,7 +213,7 @@ export class TaskBoard extends LitElement {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/tasks/${e.detail.task.id}`,
+        `/api/tasks/${e.detail.task.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
