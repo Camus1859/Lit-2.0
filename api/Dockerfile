@@ -4,4 +4,4 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . . 
 EXPOSE 3000
-CMD ["tsx", "index.ts"]
+CMD ["npx", "tsx", "index.ts"]
