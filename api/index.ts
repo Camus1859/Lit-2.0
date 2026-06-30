@@ -33,7 +33,7 @@ app.post("/api/tasks", (req, res) => {
   const newTask = req.body;
 
   try {
-    tasks = [...tasks, newTask];
+    tasks = [...tasks, {...newTask, id: Math.random().toString()}];
 
     saveTasks(tasks);
 
