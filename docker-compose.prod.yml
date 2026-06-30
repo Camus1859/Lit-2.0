@@ -1,0 +1,10 @@
+services:
+  api:
+    image: alaventure/api
+    ports: 
+      - 3000:3000
+
+  front-end:
+    image: alaventure/front-end
+    ports:
+      - 80:80
